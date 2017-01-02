@@ -149,12 +149,4 @@ Run the Spark Streaming application to populate Kudu:
 Finally, run the web application using jetty: 
     mvn jetty:run
 
-If you go to <hostname>:8080, you should see 
-
-Now if you go back to the visualization, which refreshes
-every 7 seconds, the following should occur:
-  1. Green circles appear representing valid users.
-  2. 2-3 page refreshes later, red circles should appear.
-    The red circles are DDOS attackers.
-  3. 7-8 page refreshes later red cirecles will disappear
-  4. Go to step 2
+If you go to <hostname>:8080, you should see a visualization showing the largest order within that ten second window for each stock.  

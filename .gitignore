@@ -9,7 +9,7 @@ flume_ratings.tsv
 .lib/
 dist/*
 */target/
-*/checkpoint/
+checkpoint/
 lib_managed/
 src_managed/
 project/boot/
