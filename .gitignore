@@ -1,0 +1,24 @@
+*.class
+*.log
+user_ratings.txt
+flume_ratings.tsv
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/*
+*/target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+
+dependency-reduced-pom.xml
+.idea*
+*.iml
