@@ -83,6 +83,9 @@ Download the driver and install it in your local maven repository:
             <version>${impala.jdbc.version}</version>
         </dependency>
 
+mvn install:install-file -Dfile=/Users/bosshart/Downloads/2.5.36GAImpalaJDBC41.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ImpalaJDBC41 -Dversion=2.5.36 -Dpackaging=jar
+
+
 mvn install:install-file -Dfile=/Users/bosshart/Downloads/2.5.36GA/Cloudera_ImpalaJDBC4_2.5.36/ImpalaJDBC4.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ImpalaJDBC42 -Dversion=2.5.36 -Dpackaging=jar
 mvn install:install-file -Dfile=/Users/bosshart/Downloads/2.5.36GA/Cloudera_ImpalaJDBC4_2.5.36/hive_service.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_service -Dversion=2.5.36 -Dpackaging=jar
 mvn install:install-file -Dfile=/Users/bosshart/Downloads/2.5.36GA/Cloudera_ImpalaJDBC4_2.5.36/hive_metastore.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_metastore -Dversion=2.5.36 -Dpackaging=jar

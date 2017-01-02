@@ -48,11 +48,12 @@ object CreateFixTable {
       "kudu.master" -> kuduMaster)
 
     val kuduContext = new KuduContext(kuduMaster)
-
     if(kuduContext.tableExists(tableName )) {
+      System.out.println("Deleting existing table with same name.")
       kuduContext.deleteTable(tableName)
     }
 
+    System.out.println("Creating new Kudu table " + tableName + " with " + numberOfDays + " date partitions. ")
     val options = new CreateTableOptions()
       .setRangePartitionColumns(ImmutableList.of("transacttime"))
       .addHashPartitions(ImmutableList.of("clordid"), 3)

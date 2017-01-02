@@ -1,6 +1,6 @@
 package com.kuduscreencast.timeseries;
 
-import com.cloudera.impala.jdbc4.DataSource;
+import com.cloudera.impala.jdbc41.DataSource;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -22,7 +22,7 @@ public class FIXDataServlet extends HttpServlet {
       "connection.url", "jdbc:impala://quickstart.cloudera:21050");
 
   private static String jdbcDriverName = System.getProperty(
-      "jdbc.driver.name", "com.cloudera.impala.jdbc4.DataSource");
+      "jdbc.driver.name", "com.cloudera.impala.jdbc41.DataSource");
 
 
   public void init(ServletConfig config) throws ServletException {
@@ -31,7 +31,7 @@ public class FIXDataServlet extends HttpServlet {
     try {
       // Load the driver
       Class.forName(jdbcDriverName);
-      DataSource ds = new com.cloudera.impala.jdbc4.DataSource();
+      DataSource ds = new DataSource();
       ds.setURL(connectionUrl);
       connection = ds.getConnection();
     }

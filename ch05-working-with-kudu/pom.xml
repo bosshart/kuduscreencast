@@ -164,8 +164,6 @@
             <artifactId>TCLIServiceClient</artifactId>
             <version>${impala.jdbc.version}</version>
         </dependency>
-
-
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libfb303</artifactId>

@@ -4,8 +4,8 @@ This example shows how to build and run a project that demonstrates realtime dat
 
 This example was testing using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
 
-#### Preparing the Kudu quickstart VM
-When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to start by installing Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing these steps, you can easily use Cloudera Manager to accomplish the same thing. 
+#### 1. Preparing the Kudu quickstart VM
+When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to start by installing Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing this step and going straight to Step 2, you can easily use Cloudera Manager to accomplish the same thing. 
 
 Since the quickstart only has the CDH and Kudu repositories, add the Cloudera Kafka 2.0 repository. 
 
@@ -56,11 +56,47 @@ Start Spark
     sudo service spark-worker start
     
 
-#### Clone and build the code. 
+#### 2. Install JDBC drivers and build the code. 
 
+Run the following on the host where you want to build the application. If running from the kudu quickstart you'll need to install maven. 
 
+The webapp that feeds the FIX message visualization connects to Kudu through Impala, meaning you will need to download the Impala JDBC driver jars and make them available to maven as a dependency. For more information on how to build and run a Maven-based project to execute SQL queries on Impala using JDBC, see [here](https://github.com/onefoursix/Cloudera-Impala-JDBC-Example). 
+ 
+The pom dependency file for our project includes references to the following jars that are not available in public repos. 
+
+    (1)  ImpalaJDBC41.jar
+    (2)  TCLIServiceClient.jar
+    (3)  hive_metastore.jar
+    (4)  hive_service.jar
+    (5)  ql.jar
     
-#### Create FIX Message Kafka Topic, Kudu, and Impala Table
+Download the appropriate JDBC connector jars from the [cloudera website](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html), scp it (if needed), and unzip the file. 
+
+    scp impala_jdbc_2.5.36.2056.zip demo@quickstart:/tmp
+    unzip impala_jdbc_2.5.36.2056.zip
+    cd 2.5.36.1056\ GA/
+    unzip Cloudera_ImpalaJDBC41_2.5.36.zip
+
+Install the JDBC drivers in your local maven repo: 
+
+    mvn install:install-file -Dfile=ImpalaJDBC4.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ImpalaJDBC41 -Dversion=2.5.36 -Dpackaging=jar
+    mvn install:install-file -Dfile=hive_service.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_service -Dversion=2.5.36 -Dpackaging=jar
+    mvn install:install-file -Dfile=hive_metastore.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_metastore -Dversion=2.5.36 -Dpackaging=jar
+    mvn install:install-file -Dfile=ql.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ql -Dversion=2.5.36 -Dpackaging=jar
+    mvn install:install-file -Dfile=TCLIServiceClient.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=TCLIServiceClient -Dversion=2.5.36 -Dpackaging=jar
+
+Clone the repo and build the project. 
+
+    git clone https://github.com/bosshart/kuduscreencast.git
+    cd kuduscreencast/ch05-working-with-kudu/
+    mvn clean
+    mvn package
+
+Move the "sample app" to the quickstart VM or edge node as needed. 
+
+    scp target/sample.app-1.0-SNAPSHOT.jar demo@quickstart.cloudera:/tmp/
+
+#### 3. Create FIX Message Kafka Topic, Kudu, and Impala Table
 
 The FIX message generator will publish order and execution messages to a Kafka topic. I named my kafka topic "fixdata". 
 
@@ -76,29 +112,49 @@ You should be able input test in the "producer" side and see it emitted in the c
 
 Next, create the corresponding Kudu and Impala tables. I also named the table "fixdata".
     
+    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3
+    impala-shell
+    [quickstart.cloudera:21000] > CREATE EXTERNAL TABLE `fixdata` (
+    `transacttime` BIGINT,
+    `clordid` STRING,
+    `msgtype` STRING,
+    `stocksymbol` STRING,
+    `orderqty` INT,
+    `leavesqty` INT,
+    `cumqty` INT,
+    `avgpx` DOUBLE,
+    `startdate` BIGINT,
+    `enddate` BIGINT,
+    `lastupdated` BIGINT
+    )
+    TBLPROPERTIES(
+      'storage_handler' = 'com.cloudera.kudu.hive.KuduStorageHandler',
+      'kudu.table_name' = 'fixdata',
+      'kudu.master_addresses' = 'quickstart.cloudera:7051',
+      'kudu.key_columns' = 'transacttime, clordid'
+    );
     
-
-
 
 #### Starting Data Ingest
 
-Build the "sample app" and scp it to the quickstart VM or edge node as needed. 
-
-    cd kuduscreencast/ch05-working-with-kudu/
-    mvn clean
-    mvn package
-    scp target/sample.app-1.0-SNAPSHOT.jar demo@quickstart.cloudera:/tmp/
     
 Run the Fix generator
 
     spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.FIXGenerator sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata
 
-Run the  
+Run the Spark Streaming application to populate Kudu: 
     
         spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
-        
-    spark-submit --class com.kuduscreencast.timeseries.KuduFixDataStreamer --master spark://:quickstart.cloudera 
-      target/sparkwordcount-0.0.1-SNAPSHOT.jar
-    
-    
-    quickstart:9092 fixdata quickstart fixdata local
+
+Finally, run the web application using jetty: 
+    mvn jetty:run
+
+If you go to <hostname>:8080, you should see 
+
+Now if you go back to the visualization, which refreshes
+every 7 seconds, the following should occur:
+  1. Green circles appear representing valid users.
+  2. 2-3 page refreshes later, red circles should appear.
+    The red circles are DDOS attackers.
+  3. 7-8 page refreshes later red cirecles will disappear
+  4. Go to step 2
