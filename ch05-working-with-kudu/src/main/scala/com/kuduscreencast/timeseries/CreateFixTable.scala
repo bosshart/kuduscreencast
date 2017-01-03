@@ -22,8 +22,8 @@ object CreateFixTable {
 
   val fixSchema: Schema = {
     val columns = ImmutableList.of(
-      new ColumnSchemaBuilder("transacttime", Type.INT64).key(true).build(),
       new ColumnSchemaBuilder("clordid", Type.STRING).key(true).build(),
+      new ColumnSchemaBuilder("transacttime", Type.INT64).key(true).build(),
       new ColumnSchemaBuilder("msgtype", Type.STRING).key(false).build(),
       new ColumnSchemaBuilder("stocksymbol", Type.STRING).key(false).build(),
       new ColumnSchemaBuilder("orderqty", Type.INT32).nullable(true).key(false).build(),
@@ -65,31 +65,15 @@ object CreateFixTable {
       val lowerBound = fixSchema.newPartialRow()
       val lbMillis = today.plusDays(i).getMillis
       lowerBound.addLong("transacttime", lbMillis)
-      val upperBound = fixSchema.newPartialRow();
+      val upperBound = fixSchema.newPartialRow()
       upperBound.addLong("transacttime", (lbMillis+dayInMillis-1))
       options.addRangePartition(lowerBound, upperBound)
     }
-    kuduContext.syncClient.createTable(tableName, fixSchema, options)
+    kuduContext.createTable(tableName, KuduFixDataStreamer.schema, Seq("clordid","transacttime"),options)
+
+    //kuduContext.syncClient.createTable(tableName, fixSchema, options)
     System.out.println("Successfully created " + tableName)
 
-  }
-
-  def getTimstamp(tsStr: String): Long = {
-    var format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    format.setTimeZone(TimeZone.getTimeZone("GMT"));
-    val parsedTime = format.parse(tsStr)
-    var ts = new java.sql.Timestamp(parsedTime.getTime());
-    ts.getTime
-  }
-
-  private def getSqlContext(appName: String, isLocal: Boolean): SQLContext = {
-    val sparkConf = new SparkConf().setAppName(appName)
-    if (isLocal) {
-      sparkConf.setMaster("local").
-        set("spark.ui.enabled", "false")
-    }
-    val sc = new SparkContext(sparkConf)
-    new SQLContext(sc)
   }
 }
 

@@ -114,24 +114,24 @@ Next, create the corresponding Kudu and Impala tables. I also named the table "f
     java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3
     impala-shell
     [quickstart.cloudera:21000] > CREATE EXTERNAL TABLE `fixdata` (
-    `transacttime` BIGINT,
-    `clordid` STRING,
-    `msgtype` STRING,
-    `stocksymbol` STRING,
-    `orderqty` INT,
-    `leavesqty` INT,
-    `cumqty` INT,
-    `avgpx` DOUBLE,
-    `startdate` BIGINT,
-    `enddate` BIGINT,
-    `lastupdated` BIGINT
-    )
-    TBLPROPERTIES(
-      'storage_handler' = 'com.cloudera.kudu.hive.KuduStorageHandler',
-      'kudu.table_name' = 'fixdata',
-      'kudu.master_addresses' = 'quickstart.cloudera:7051',
-      'kudu.key_columns' = 'transacttime, clordid'
-    );
+                                  `clordid` STRING,
+                                  `transacttime` BIGINT,
+                                  `msgtype` STRING,
+                                  `stocksymbol` STRING,
+                                  `orderqty` INT,
+                                  `leavesqty` INT,
+                                  `cumqty` INT,
+                                  `avgpx` DOUBLE,
+                                  `startdate` BIGINT,
+                                  `enddate` BIGINT,
+                                  `lastupdated` BIGINT
+                                  )
+                                  TBLPROPERTIES(
+                                    'storage_handler' = 'com.cloudera.kudu.hive.KuduStorageHandler',
+                                    'kudu.table_name' = 'fixdata',
+                                    'kudu.master_addresses' = 'quickstart.cloudera:7051',
+                                    'kudu.key_columns' = 'clordid, transacttime'
+                                  );t 
     
 
 #### 4. Run the Application

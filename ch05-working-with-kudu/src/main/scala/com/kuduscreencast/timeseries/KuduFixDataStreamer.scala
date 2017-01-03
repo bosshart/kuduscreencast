@@ -12,8 +12,8 @@ import org.apache.spark.{SparkConf, SparkContext}
 object KuduFixDataStreamer {
   val schema =
     StructType(
-      StructField("transacttime", LongType, false) ::
       StructField("clordid", StringType, false) ::
+      StructField("transacttime", LongType, false) ::
       StructField("msgtype", StringType, true) ::
       StructField("stocksymbol", StringType, true) ::
       StructField("orderqty", IntegerType, true) ::
@@ -49,11 +49,10 @@ object KuduFixDataStreamer {
     } else {
       println("Running Cluster")
     }
-    val sc = new SparkContext(sparkConf);
+    val sc = new SparkContext(sparkConf)
     val sqlContext = new SQLContext(sc)
     val ssc = new StreamingContext(sc, Seconds(5))
     val createNewTable: Boolean = false
-
 
     val broadcastSchema = sc.broadcast(schema)
     var kuduContext: KuduContext = new KuduContext(kuduMaster)
@@ -80,25 +79,28 @@ object KuduFixDataStreamer {
     ssc.awaitTermination()
   }
 
-
+  /**
+    * Takes a generated FIX Message string, parses into key-value pairs, and returns
+    * @param eventString
+    * @return
+    */
   def parseFixEvent(eventString: String) : Row = {
     var fixElements = scala.collection.mutable.Map[String,String]()
     val pattern = """(\d*)=(.*?)(?:[\001])""".r
     pattern.findAllIn(eventString).matchData foreach {
       m => fixElements. += (m.group(1) -> m.group(2))
     }
-
     try {
-      Row(fixElements("60").toLong /* 60: transacttime */,
-        fixElements("11") /* 11: clordid */,
-        fixElements("35") /* 35: msgtype */,
-        fixElements("55") /* 55: symbol */,
-        if (fixElements("35").equals("D")) fixElements("38").toInt else null /* 38: orderqty */,
-        if (fixElements.contains("151")) fixElements("151").toInt else null /* 151: leavesqty */,
-        if (fixElements.contains("14")) fixElements("14").toInt else null /* 14: cumqty */,
-        if (fixElements.contains("6")) fixElements("6").toDouble else null /* 6: avgpx */,
-        if (fixElements("35").equals("D")) fixElements("60").toLong else null /* 60: transacttime */,
-        if (fixElements.contains("151") && fixElements("151")==0) fixElements("60").toLong else null /* 60: transacttime */,
+      Row(fixElements("11") /* clordid = 11: clordid */,
+        fixElements("60").toLong /* transacttime = 60: transacttime */,
+        fixElements("35") /* msgtype = 35: msgtype */,
+        fixElements("55") /* stocksymbol = 55: symbol */,
+        if (fixElements("35").equals("D")) fixElements("38").toInt else null /* orderqty = 38: orderqty */,
+        if (fixElements.contains("151")) fixElements("151").toInt else null /* leavesqty = 151: leavesqty */,
+        if (fixElements.contains("14")) fixElements("14").toInt else null /* cumqty = 14: cumqty */,
+        if (fixElements.contains("6")) fixElements("6").toDouble else null /* avgpx = 6: avgpx */,
+        if (fixElements("35").equals("D")) fixElements("60").toLong else null /* startdate = 60: transacttime */,
+        if (fixElements.contains("151") && fixElements("151")==0) fixElements("60").toLong else null /* lastupdated = 60: transacttime */,
         System.currentTimeMillis())
     } catch {
         case e:Exception => e.printStackTrace()
