@@ -70,6 +70,7 @@ object CreateFixTable {
       options.addRangePartition(lowerBound, upperBound)
     }
     kuduContext.syncClient.createTable(tableName, fixSchema, options)
+    System.out.println("Successfully created " + tableName)
 
   }
 

@@ -98,9 +98,8 @@ Move the "sample app" to the quickstart VM or edge node as needed.
 
 #### 3. Create FIX Message Kafka Topic, Kudu, and Impala Table
 
-The FIX message generator will publish order and execution messages to a Kafka topic. I named my kafka topic "fixdata". 
+The FIX message generator will publish order and execution messages to a Kafka topic. I named my kafka topic "fixdata" and configured it with one partition and no replicas so it could run on the quickstart VM.
 
-    kafka-topics --zookeeper quickstart:2181 --delete --topic fixdata
     kafka-topics --zookeeper quickstart:2181 --create --topic fixdata --partitions 1 --replication-factor 1
     
 If you want, you can test Kafka. In separate ssh sessions, run both: 
@@ -135,18 +134,20 @@ Next, create the corresponding Kudu and Impala tables. I also named the table "f
     );
     
 
-#### Starting Data Ingest
+#### 4. Run the Application
 
     
-Run the Fix generator
+Run the Fix message generator
 
     spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.FIXGenerator sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata
 
 Run the Spark Streaming application to populate Kudu: 
     
-        spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
+    spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
 
 Finally, run the web application using jetty: 
-    mvn jetty:run
 
-If you go to <hostname>:8080, you should see a visualization showing the largest order within that ten second window for each stock.  
+    mvn jetty:run
+    
+
+If you go to web-app-hostname:8080, you should see a visualization showing the largest order within that ten second window for each stock symbol. The chart should automatically refresh it's data every 10 seconds.  

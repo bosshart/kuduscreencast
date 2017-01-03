@@ -65,7 +65,7 @@ object KuduFixDataStreamer {
     })
     val parsedDf = parsed.foreachRDD(rdd => {
       val df = sqlContext.createDataFrame(rdd, broadcastSchema.value)
-      kuduContext.upsertRows(df, tableName)
+      kuduContext.insertRows(df, tableName)
     })
 
     sys.ShutdownHookThread {

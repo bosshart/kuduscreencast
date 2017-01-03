@@ -33,10 +33,11 @@ public class FIXGenerator {
         producer.send(new ProducerRecord<String, String>(args[1], newOrderSingleFIX));
         openOrders.add(newOrder);
       }
-      Thread.sleep(1);
+
       for (Order order : openOrders) {
         if (!order.isComplete()) {
           if (order.hasFurtherExecuted()) {
+            Thread.sleep(1);
             String executionReportFIX = order.nextExecutionReportFIX();
             producer.send(new ProducerRecord<String, String>(args[1], executionReportFIX));
           }

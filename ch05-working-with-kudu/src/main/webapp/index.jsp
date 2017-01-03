@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=US-ASCII"
+pageEncoding="US-ASCII"%>
 <html>
 
 
@@ -8,20 +9,20 @@
 </head>
 
 <body>
-
-<div id="myChart" style="width: 480px; height: 400px;"><!-- Plotly chart will be drawn inside this DIV --></div>
+<div id="myChart" style="width: 480px; height: 400px;"><!-- Chart will be drawn inside this DIV --></div>
 <script>
 
     function makeplot() {
-      Plotly.d3.csv("http://localhost:8080/stockdata/", function(data){ processData(data, true) } );
+      Plotly.d3.csv("http://<%=request.getServerName() %>:8080/stockdata/", function(data){ processData(data, true) } );
     };
 
     var layout = {
       yaxis: {range: [0, 10000]},
-      title: 'Plotting data from Kudu!!!'
+      title: 'Plotting Largest Orders from Kudu!)'
     };
 
     function processData(allRows, firstRun) {
+      /** to do: use Plotly.restyle('myChart', traces); to update instead of refresh chart **/
       var plotCreated = false;
       var x = [], y = [], currentSymbol = '';
       for (var i=0; i<allRows.length; i++) {
@@ -33,15 +34,12 @@
                     y: y,
                     name: currentSymbol
                   }];
-                if(!plotCreated && firstRun) {
+                if(!plotCreated) {
                     Plotly.newPlot('myChart', traces, layout);
                     plotCreated=true;
                 } else {
-                    if(firstRun) {
-                        Plotly.addTraces('myChart', traces);
-                    } else {
-                        Plotly.restyle('myChart', traces);
-                    }
+                    Plotly.addTraces('myChart', traces);
+
                 }
             }
             currentSymbol = row['symbol'];
@@ -56,7 +54,7 @@
     makeplot();
 
     window.setInterval(function(){
-        Plotly.d3.csv("http://localhost:8080/stockdata/", function(data){ processData(data, false) } );
+        makeplot();
     }, 5000);
 
   </script>
