@@ -122,8 +122,6 @@ Next, create the corresponding Kudu and Impala tables. I also named the table "f
                                   `leavesqty` INT,
                                   `cumqty` INT,
                                   `avgpx` DOUBLE,
-                                  `startdate` BIGINT,
-                                  `enddate` BIGINT,
                                   `lastupdated` BIGINT
                                   )
                                   TBLPROPERTIES(
@@ -131,7 +129,7 @@ Next, create the corresponding Kudu and Impala tables. I also named the table "f
                                     'kudu.table_name' = 'fixdata',
                                     'kudu.master_addresses' = 'quickstart.cloudera:7051',
                                     'kudu.key_columns' = 'clordid, transacttime'
-                                  );t 
+                                  );
     
 
 #### 4. Run the Application

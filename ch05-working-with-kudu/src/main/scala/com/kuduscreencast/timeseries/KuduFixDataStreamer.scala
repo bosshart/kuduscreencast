@@ -20,8 +20,6 @@ object KuduFixDataStreamer {
       StructField("leavesqty", IntegerType, true) ::
       StructField("cumqty", IntegerType, true) ::
       StructField("avgpx", DoubleType, true) ::
-      StructField("startdate", LongType, true) ::
-      StructField("enddate", LongType, true) ::
       StructField("lastupdated", LongType, true) :: Nil)
 
   def main(args: Array[String]): Unit = {
@@ -99,8 +97,6 @@ object KuduFixDataStreamer {
         if (fixElements.contains("151")) fixElements("151").toInt else null /* leavesqty = 151: leavesqty */,
         if (fixElements.contains("14")) fixElements("14").toInt else null /* cumqty = 14: cumqty */,
         if (fixElements.contains("6")) fixElements("6").toDouble else null /* avgpx = 6: avgpx */,
-        if (fixElements("35").equals("D")) fixElements("60").toLong else null /* startdate = 60: transacttime */,
-        if (fixElements.contains("151") && fixElements("151")==0) fixElements("60").toLong else null /* lastupdated = 60: transacttime */,
         System.currentTimeMillis())
     } catch {
         case e:Exception => e.printStackTrace()

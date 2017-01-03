@@ -30,8 +30,6 @@ object CreateFixTable {
       new ColumnSchemaBuilder("leavesqty", Type.INT32).nullable(true).key(false).build(),
       new ColumnSchemaBuilder("cumqty", Type.INT32).nullable(true).key(false).build(),
       new ColumnSchemaBuilder("avgpx", Type.DOUBLE).nullable(true).key(false).build(),
-      new ColumnSchemaBuilder("startdate", Type.INT64).nullable(true).key(false).build(),
-      new ColumnSchemaBuilder("enddate", Type.INT64).nullable(true).key(false).build(),
       new ColumnSchemaBuilder("lastupdated", Type.INT64).key(false).build())
     new Schema(columns)
   }
