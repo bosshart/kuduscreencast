@@ -1,6 +1,6 @@
 ### Realtime Timeseries Example using "KIKS Stack" (Apache Kafka, Impala, Kudu, Spark Streaming)
 
-This example shows how to build and run a project that demonstrates realtime data ingest, processing, and query. The project uses a FIX message generator to simulate the continious creation of Fix financial messages which are published to Kafka and then persisted to Kudu using a Spark Streaming job. Once the FIX data is persisted into Kudu, a small web application uses Impala (via JDBC) to feed a realtime chart that analyzes peak order activity in near-realtime. 
+This example shows how to build and run a project that demonstrates realtime data ingest, processing, and query using Apache Kudu. The project uses a [FIX message generator](https://github.com/cloudera-labs/envelope/tree/master/examples/fix) to simulate the continious creation of Fix financial messages which are published to Kafka and then persisted to Kudu using a Spark Streaming job. Once the FIX data is persisted into Kudu, a small web application uses Impala (via JDBC) to feed a realtime chart that analyzes peak order activity in near-realtime. 
 
 This example was testing using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
 
@@ -79,7 +79,7 @@ Download the appropriate JDBC connector jars from the [cloudera website](http://
 
 Install the JDBC drivers in your local maven repo: 
 
-    mvn install:install-file -Dfile=ImpalaJDBC4.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ImpalaJDBC41 -Dversion=2.5.36 -Dpackaging=jar
+    mvn install:install-file -Dfile=ImpalaJDBC41.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ImpalaJDBC41 -Dversion=2.5.36 -Dpackaging=jar
     mvn install:install-file -Dfile=hive_service.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_service -Dversion=2.5.36 -Dpackaging=jar
     mvn install:install-file -Dfile=hive_metastore.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=hive_metastore -Dversion=2.5.36 -Dpackaging=jar
     mvn install:install-file -Dfile=ql.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ql -Dversion=2.5.36 -Dpackaging=jar
@@ -109,15 +109,15 @@ If you want, you can test Kafka. In separate ssh sessions, run both:
 
 You should be able input test in the "producer" side and see it emitted in the consumer. 
 
-Next, create the corresponding Kudu and Impala tables. I also named the table "fixdata".
+Next, create the corresponding Kudu and Impala tables. I also named the table "fixdata" and specified 3 hash partitions on stocksymbol and 3-day range partitions on transaction time.
     
-    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3
+    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3 3
     impala-shell
     [quickstart.cloudera:21000] > CREATE EXTERNAL TABLE `fixdata` (
-                                  `clordid` STRING,
                                   `transacttime` BIGINT,
-                                  `msgtype` STRING,
                                   `stocksymbol` STRING,
+                                  `clordid` STRING,
+                                  `msgtype` STRING,
                                   `orderqty` INT,
                                   `leavesqty` INT,
                                   `cumqty` INT,
@@ -128,7 +128,7 @@ Next, create the corresponding Kudu and Impala tables. I also named the table "f
                                     'storage_handler' = 'com.cloudera.kudu.hive.KuduStorageHandler',
                                     'kudu.table_name' = 'fixdata',
                                     'kudu.master_addresses' = 'quickstart.cloudera:7051',
-                                    'kudu.key_columns' = 'clordid, transacttime'
+                                    'kudu.key_columns' = 'transacttime, stocksymbol, clordid'
                                   );
     
 
@@ -141,7 +141,7 @@ Run the Fix message generator
 
 Run the Spark Streaming application to populate Kudu: 
     
-    spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
+    spark-submit --master spark://quickstart:7077  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
 
 Finally, run the web application using jetty: 
 

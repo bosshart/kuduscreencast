@@ -1,7 +1,5 @@
 package com.kuduscreencast.timeseries
 
-import java.text.SimpleDateFormat
-import java.util.{Calendar, Date, TimeZone}
 import java.util.concurrent.TimeUnit
 
 import com.cloudera.org.joda.time.DateTime
@@ -10,22 +8,16 @@ import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder
 import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.spark.kudu.KuduContext
 import org.apache.kudu.{Schema, Type}
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.{SparkConf, SparkContext}
 
-import scala.collection.mutable.MutableList
 
-/**
-  * Created by bosshart on 12/4/16.
-  */
 object CreateFixTable {
 
   val fixSchema: Schema = {
     val columns = ImmutableList.of(
-      new ColumnSchemaBuilder("clordid", Type.STRING).key(true).build(),
       new ColumnSchemaBuilder("transacttime", Type.INT64).key(true).build(),
+      new ColumnSchemaBuilder("stocksymbol", Type.STRING).key(true).build(),
+      new ColumnSchemaBuilder("clordid", Type.STRING).key(true).build(),
       new ColumnSchemaBuilder("msgtype", Type.STRING).key(false).build(),
-      new ColumnSchemaBuilder("stocksymbol", Type.STRING).key(false).build(),
       new ColumnSchemaBuilder("orderqty", Type.INT32).nullable(true).key(false).build(),
       new ColumnSchemaBuilder("leavesqty", Type.INT32).nullable(true).key(false).build(),
       new ColumnSchemaBuilder("cumqty", Type.INT32).nullable(true).key(false).build(),
@@ -35,11 +27,12 @@ object CreateFixTable {
   }
 
   def main(args:Array[String]): Unit = {
-    if (args.length < 3) {
-      println("{kuduMaster} {tableName} {number of days/partitions}")
+    if (args.length < 4) {
+      println("{kuduMaster} {tableName} {number hash partitions} {number of range partitions (by day)}")
       return
     }
-    val Array(kuduMaster, tableName, numberOfDaysStr) = args
+    val Array(kuduMaster, tableName, numberOfHashPartitionsStr, numberOfDaysStr) = args
+    val numberOfHashPartitions = numberOfDaysStr.toInt
     val numberOfDays = numberOfDaysStr.toInt
     var kuduOptions = Map(
       "kudu.table" -> tableName,
@@ -50,11 +43,11 @@ object CreateFixTable {
       System.out.println("Deleting existing table with same name.")
       kuduContext.deleteTable(tableName)
     }
+    System.out.println("Creating new Kudu table " + tableName + " with " + numberOfHashPartitions + " hash partitions and " + numberOfDays + " date partitions. ")
 
-    System.out.println("Creating new Kudu table " + tableName + " with " + numberOfDays + " date partitions. ")
     val options = new CreateTableOptions()
       .setRangePartitionColumns(ImmutableList.of("transacttime"))
-      .addHashPartitions(ImmutableList.of("clordid"), 3)
+      .addHashPartitions(ImmutableList.of("stocksymbol"), numberOfHashPartitions)
       .setNumReplicas(1)
 
     val today = new DateTime().withTimeAtStartOfDay()
@@ -67,9 +60,8 @@ object CreateFixTable {
       upperBound.addLong("transacttime", (lbMillis+dayInMillis-1))
       options.addRangePartition(lowerBound, upperBound)
     }
-    kuduContext.createTable(tableName, KuduFixDataStreamer.schema, Seq("clordid","transacttime"),options)
+    kuduContext.createTable(tableName, KuduFixDataStreamer.schema, Seq("transacttime","stocksymbol","clordid"),options)
 
-    //kuduContext.syncClient.createTable(tableName, fixSchema, options)
     System.out.println("Successfully created " + tableName)
 
   }

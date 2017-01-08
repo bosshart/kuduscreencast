@@ -12,10 +12,10 @@ import org.apache.spark.{SparkConf, SparkContext}
 object KuduFixDataStreamer {
   val schema =
     StructType(
-      StructField("clordid", StringType, false) ::
       StructField("transacttime", LongType, false) ::
+      StructField("stocksymbol", StringType, false) ::
+      StructField("clordid", StringType, false) ::
       StructField("msgtype", StringType, true) ::
-      StructField("stocksymbol", StringType, true) ::
       StructField("orderqty", IntegerType, true) ::
       StructField("leavesqty", IntegerType, true) ::
       StructField("cumqty", IntegerType, true) ::
@@ -50,7 +50,6 @@ object KuduFixDataStreamer {
     val sc = new SparkContext(sparkConf)
     val sqlContext = new SQLContext(sc)
     val ssc = new StreamingContext(sc, Seconds(5))
-    val createNewTable: Boolean = false
 
     val broadcastSchema = sc.broadcast(schema)
     var kuduContext: KuduContext = new KuduContext(kuduMaster)
@@ -78,9 +77,9 @@ object KuduFixDataStreamer {
   }
 
   /**
-    * Takes a generated FIX Message string, parses into key-value pairs, and returns
-    * @param eventString
-    * @return
+    * Takes a generated FIX Message string, parses into key-value pairs, and returns a Row
+    * @param eventString - string of key value pairs formatted FIX event
+    * @return - Row representing a single FIX order or execution report
     */
   def parseFixEvent(eventString: String) : Row = {
     var fixElements = scala.collection.mutable.Map[String,String]()
@@ -89,15 +88,17 @@ object KuduFixDataStreamer {
       m => fixElements. += (m.group(1) -> m.group(2))
     }
     try {
-      Row(fixElements("11") /* clordid = 11: clordid */,
+      Row(
         fixElements("60").toLong /* transacttime = 60: transacttime */,
-        fixElements("35") /* msgtype = 35: msgtype */,
         fixElements("55") /* stocksymbol = 55: symbol */,
+        fixElements("11") /* clordid = 11: clordid */,
+        fixElements("35") /* msgtype = 35: msgtype */,
         if (fixElements("35").equals("D")) fixElements("38").toInt else null /* orderqty = 38: orderqty */,
         if (fixElements.contains("151")) fixElements("151").toInt else null /* leavesqty = 151: leavesqty */,
         if (fixElements.contains("14")) fixElements("14").toInt else null /* cumqty = 14: cumqty */,
         if (fixElements.contains("6")) fixElements("6").toDouble else null /* avgpx = 6: avgpx */,
-        System.currentTimeMillis())
+        System.currentTimeMillis()
+      )
     } catch {
         case e:Exception => e.printStackTrace()
         null
