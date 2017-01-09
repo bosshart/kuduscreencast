@@ -27,16 +27,14 @@ object CreateFixTable {
   }
 
   def main(args:Array[String]): Unit = {
-    if (args.length < 4) {
-      println("{kuduMaster} {tableName} {number hash partitions} {number of range partitions (by day)}")
+    if (args.length < 5) {
+      println("{kuduMaster} {tableName} {number hash partitions} {number of range partitions (by day)} {'quickstart' to use single tablet replica, anything else uses 3 replicas}")
       return
     }
-    val Array(kuduMaster, tableName, numberOfHashPartitionsStr, numberOfDaysStr) = args
+    val Array(kuduMaster, tableName, numberOfHashPartitionsStr, numberOfDaysStr, quickstart) = args
+    val tabletReplicas = if(quickstart.equals("quickstart")) { 1 } else { 3 }
     val numberOfHashPartitions = numberOfDaysStr.toInt
     val numberOfDays = numberOfDaysStr.toInt
-    var kuduOptions = Map(
-      "kudu.table" -> tableName,
-      "kudu.master" -> kuduMaster)
 
     val kuduContext = new KuduContext(kuduMaster)
     if(kuduContext.tableExists(tableName )) {
@@ -48,16 +46,17 @@ object CreateFixTable {
     val options = new CreateTableOptions()
       .setRangePartitionColumns(ImmutableList.of("transacttime"))
       .addHashPartitions(ImmutableList.of("stocksymbol"), numberOfHashPartitions)
-      .setNumReplicas(1)
+      .setNumReplicas(tabletReplicas)
 
     val today = new DateTime().withTimeAtStartOfDay()
     val dayInMillis = TimeUnit.MILLISECONDS.convert(1, TimeUnit.DAYS)
     for (i <- 0 until numberOfDays ){
-      val lowerBound = fixSchema.newPartialRow()
       val lbMillis = today.plusDays(i).getMillis
+      val upMillis = lbMillis+dayInMillis-1
+      val lowerBound = fixSchema.newPartialRow()
       lowerBound.addLong("transacttime", lbMillis)
       val upperBound = fixSchema.newPartialRow()
-      upperBound.addLong("transacttime", (lbMillis+dayInMillis-1))
+      upperBound.addLong("transacttime", (upMillis))
       options.addRangePartition(lowerBound, upperBound)
     }
     kuduContext.createTable(tableName, KuduFixDataStreamer.schema, Seq("transacttime","stocksymbol","clordid"),options)

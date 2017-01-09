@@ -109,9 +109,9 @@ If you want, you can test Kafka. In separate ssh sessions, run both:
 
 You should be able input test in the "producer" side and see it emitted in the consumer. 
 
-Next, create the corresponding Kudu and Impala tables. I also named the table "fixdata" and specified 3 hash partitions on stocksymbol and 3-day range partitions on transaction time.
+Next, create the corresponding Kudu and Impala tables. I also named the table "fixdata" and specified 3 hash partitions on stocksymbol and 3-day range partitions on transaction time. I also specify "quickstart" in order to only create a single replica. If you skip this argument, you'll end up with the default 3 tablet replicas. 
     
-    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3 3
+    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3 3 quickstart
     impala-shell
     [quickstart.cloudera:21000] > CREATE EXTERNAL TABLE `fixdata` (
                                   `transacttime` BIGINT,
