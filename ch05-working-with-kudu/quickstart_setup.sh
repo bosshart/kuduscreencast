@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-sudo echo "[cloudera-kafka ]
+set -x
+set -e
+
+sudo echo "[cloudera-kafka]
 # Packages for Cloudera's Distribution for kafka, Version 2, on RedHat  or CentOS 6 x86_64
 name=Cloudera's Distribution for kafka, Version 2
 baseurl=http://archive.cloudera.com/kafka/redhat/6/x86_64/kafka/2.0.1/
 gpgkey = http://archive.cloudera.com/kafka/redhat/6/x86_64/kafka/RPM-GPG-KEY-cloudera
 gpgcheck = 1" > /etc/yum.repos.d/cloudera-kafka.repo
 
-sudo echo "[cloudera-cdh5 ]
+sudo echo "[cloudera-cdh5]
 # Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
 name=Cloudera's Distribution for Hadoop, Version 5
 baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.8/
