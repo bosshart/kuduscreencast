@@ -5,55 +5,14 @@ This example shows how to build and run a project that demonstrates realtime dat
 This example was testing using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
 
 #### 1. Preparing the Kudu quickstart VM
-When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to start by installing Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing this step and going straight to Step 2, you can easily use Cloudera Manager to accomplish the same thing. 
+When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to install Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing this step and going straight to Step 2, you can easily use Cloudera Manager to accomplish the same thing. 
 
-Since the quickstart only has the CDH and Kudu repositories, add the Cloudera Kafka 2.0 repository. 
-
-    cd /etc/yum.repos.d/
-    sudo vi http://archive.cloudera.com/kafka/redhat/6/x86_64/kafka/cloudera-kafka.repo
-
-Add the repository info for cloudera-kafka.repo
-
-    [cloudera-kafka]
-    # Packages for Cloudera's Distribution for kafka, Version 2, on RedHat	or CentOS 6 x86_64
-    name=Cloudera's Distribution for kafka, Version 2
-    baseurl=http://archive.cloudera.com/kafka/redhat/6/x86_64/kafka/2.0.1/
-    gpgkey = http://archive.cloudera.com/kafka/redhat/6/x86_64/kafka/RPM-GPG-KEY-cloudera    
-    gpgcheck = 1
-
-Add or modify the cloudera-cdh5.repo 
-
-    [cloudera-cdh5]
-    # Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
-    name=Cloudera's Distribution for Hadoop, Version 5
-    baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.8/
-    gpgkey = http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
-    gpgcheck = 1
-
-Install and start Zookeeper and Kafka. The zookeeper base package provides the basic libraries and scripts that are necessary to run ZooKeeper servers and clients. The zookeeper-server package contains the init.d scripts necessary to run ZooKeeper as a daemon process. Because zookeeper-server depends on zookeeper, installing the server package automatically installs the base package.
-
-    sudo yum install zookeeper-server
-    mkdir -p /var/lib/zookeeper
-    sudo chown -R zookeeper /var/lib/zookeeper/
-    sudo service zookeeper-server init
-    sudo service zookeeper-server start
+Run the 'quickstart_setup' to install the necessary software on the quickstart VM: 
     
-    sudo yum install kafka
-    sudo yum install kafka-server
-    sudo service kafka-server start
-    
-Install Spark
-
-    sudo yum install spark-core spark-master spark-worker
-
-Configure Spark. Edit /etc/spark/conf/spark-env.sh and change hostname in the last line to the name of the host where the Spark Master will run:
-
-    export STANDALONE_SPARK_MASTER_HOST=quickstart.cloudera
-
-Start Spark  
-
-    sudo service spark-master start
-    sudo service spark-worker start
+    git clone https://github.com/bosshart/kuduscreencast.git
+    cd kuduscreencast/ch05-working-with-kudu/
+    chmod u+x quickstart_setup.sh
+    sudo ./quickstart_setup.sh
     
 
 #### 2. Install JDBC drivers and build the code. 
@@ -85,7 +44,7 @@ Install the JDBC drivers in your local maven repo:
     mvn install:install-file -Dfile=ql.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=ql -Dversion=2.5.36 -Dpackaging=jar
     mvn install:install-file -Dfile=TCLIServiceClient.jar -DgroupId=com.cloudera.impala.jdbc -DartifactId=TCLIServiceClient -Dversion=2.5.36 -Dpackaging=jar
 
-Clone the repo and build the project. 
+Clone the repo (if you haven't already) and build the project. 
 
     git clone https://github.com/bosshart/kuduscreencast.git
     cd kuduscreencast/ch05-working-with-kudu/

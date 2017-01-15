@@ -10,29 +10,30 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 
 object KuduFixDataStreamer {
+
   val schema =
     StructType(
       StructField("transacttime", LongType, false) ::
-      StructField("stocksymbol", StringType, false) ::
-      StructField("clordid", StringType, false) ::
-      StructField("msgtype", StringType, true) ::
-      StructField("orderqty", IntegerType, true) ::
-      StructField("leavesqty", IntegerType, true) ::
-      StructField("cumqty", IntegerType, true) ::
-      StructField("avgpx", DoubleType, true) ::
-      StructField("lastupdated", LongType, true) :: Nil)
+        StructField("stocksymbol", StringType, false) ::
+        StructField("clordid", StringType, false) ::
+        StructField("msgtype", StringType, false) ::
+        StructField("orderqty", IntegerType, true) ::
+        StructField("leavesqty", IntegerType, true) ::
+        StructField("cumqty", IntegerType, true) ::
+        StructField("avgpx", DoubleType, true) ::
+        StructField("lastupdated", LongType, false) :: Nil)
 
   def main(args: Array[String]): Unit = {
 
     if (args.length < 5) {
       System.err.println(
         """
-                            |Usage: StockStreamer <brokers> <topics> <kuduMaster> <tableName>
+                            |Usage: StockStreamer <brokers> <topics> <kuduMaster> <tableName> <localFlag>
                             |  <brokers> is a list of one or more Kafka brokers
                             |  <topic> kafka topic to consume from
                             |  <kuduMasters> is a list of one or more Kudu masters
                             |  <tableName> is the name of the kudu table
-                            |  <local> 'local' to run in local mode, else anything else for cluster
+                            |  <localFlag> 'local' to run in local mode, else anything else for cluster
                             |
         """.stripMargin)
       System.exit(1)
@@ -50,18 +51,18 @@ object KuduFixDataStreamer {
     val sc = new SparkContext(sparkConf)
     val sqlContext = new SQLContext(sc)
     val ssc = new StreamingContext(sc, Seconds(5))
+    var kuduContext: KuduContext = new KuduContext(kuduMaster)
 
     val broadcastSchema = sc.broadcast(schema)
-    var kuduContext: KuduContext = new KuduContext(kuduMaster)
     val topicsSet = topics.split(",").toSet
-    val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers, "spark.streaming.kafka.maxRetries" -> "5")
+    val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
     val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topicsSet)
     val parsed = messages.map(line => {
       parseFixEvent(line._2)
     })
-    val parsedDf = parsed.foreachRDD(rdd => {
+    parsed.foreachRDD(rdd => {
       val df = sqlContext.createDataFrame(rdd, broadcastSchema.value)
-      kuduContext.insertRows(df, tableName)
+      kuduContext.upsertRows(df, tableName)
     })
 
     sys.ShutdownHookThread {
@@ -78,6 +79,7 @@ object KuduFixDataStreamer {
 
   /**
     * Takes a generated FIX Message string, parses into key-value pairs, and returns a Row
+    *
     * @param eventString - string of key value pairs formatted FIX event
     * @return - Row representing a single FIX order or execution report
     */
