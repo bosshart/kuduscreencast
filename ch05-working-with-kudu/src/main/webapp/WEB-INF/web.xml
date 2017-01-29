@@ -12,13 +12,5 @@
     <servlet-name>StockData</servlet-name>
     <url-pattern>/stockdata/*</url-pattern>
   </servlet-mapping>
-  <context-param>
-    <param-name>connection.url</param-name>
-    <param-value></param-value>
-  </context-param>
-  <context-param>
-    <param-name>jdbc.driver.class.name</param-name>
-    <param-value></param-value>
-  </context-param>
 </web-app>
 

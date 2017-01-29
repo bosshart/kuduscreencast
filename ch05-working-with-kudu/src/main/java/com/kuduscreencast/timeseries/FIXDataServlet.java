@@ -17,12 +17,9 @@ import java.sql.Statement;
 
 public class FIXDataServlet extends HttpServlet {
   private Connection connection;
-  private static String connectionUrl = System.getProperty(
-      "connection.url", "jdbc:impala://quickstart.cloudera:21050");
 
-  private static String jdbcDriverName = System.getProperty(
-      "jdbc.driver.name", "com.cloudera.impala.jdbc41.DataSource");
-
+  private static String connectionUrl = "jdbc:impala://quickstart.cloudera:21050";
+  private static final String jdbcDriverName = "com.cloudera.impala.jdbc41.DataSource";
 
   public void init(ServletConfig config) throws ServletException {
     super.init(config);
@@ -47,11 +44,11 @@ public class FIXDataServlet extends HttpServlet {
     try {
       Statement stmt = connection.createStatement();
 
-      rs = stmt.executeQuery("SELECT stocksymbol, max(orderqty) AS max_order, cast((cast(transacttime/10000 as int)*10000)/1000 as timestamp) AS 10_s_time_window FROM fixdata\n" +
-              "    WHERE cast(transacttime/1000 as timestamp) > date_sub(to_utc_timestamp(now(),'PDT'), interval 10 minutes)\n" +
-              "    AND cast(transacttime/1000 as timestamp) < date_sub(to_utc_timestamp(now(),'PDT'), interval 11 seconds)\n" +
-              "    GROUP BY stocksymbol, 10_s_time_window\n" +
-              "    ORDER BY stocksymbol, 10_s_time_window;");
+      // cast((cast(transacttime/10000 as int)*10000)/1000 as timestamp) this rounds the transaction time down to the nearest 10 second interval and then casts to timestamp
+      rs = stmt.executeQuery("SELECT stocksymbol, max(orderqty) AS max_order, CAST((CAST(transacttime/10000 AS int)*10000)/1000 as timestamp) AS 10_s_time_window FROM fixdata WHERE \n" +
+              "  transacttime > (CAST(unix_timestamp(to_utc_timestamp(now(),'PDT'))/10 AS int)*10 - 600)*1000 AND \n" +
+              "  transacttime < (CAST(unix_timestamp(to_utc_timestamp(now(),'PDT'))/10 AS int)*10 - 10)*1000 GROUP BY \n" +
+              "  stocksymbol, 10_s_time_window ORDER BY stocksymbol, 10_s_time_window;");
 
       BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream(), "UTF-8"));
       writer.append("symbol,orderqty,timestamp");

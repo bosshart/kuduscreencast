@@ -17,8 +17,8 @@ pageEncoding="US-ASCII"%>
     };
 
     var layout = {
-      yaxis: {range: [0, 10000]},
-      title: 'Plotting Largest Orders from Kudu!)'
+      yaxis: {range: [9500, 10000]},
+      title: 'Plotting Largest Orders from Kudu!'
     };
 
     function processData(allRows, firstRun) {

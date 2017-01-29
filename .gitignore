@@ -1,6 +1,5 @@
 *.class
 *.log
-user_ratings.txt
 flume_ratings.tsv
 
 # sbt specific

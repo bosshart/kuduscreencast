@@ -14,27 +14,27 @@ object KuduFixDataStreamer {
   val schema =
     StructType(
       StructField("transacttime", LongType, false) ::
-        StructField("stocksymbol", StringType, false) ::
-        StructField("clordid", StringType, false) ::
-        StructField("msgtype", StringType, false) ::
-        StructField("orderqty", IntegerType, true) ::
-        StructField("leavesqty", IntegerType, true) ::
-        StructField("cumqty", IntegerType, true) ::
-        StructField("avgpx", DoubleType, true) ::
-        StructField("lastupdated", LongType, false) :: Nil)
+      StructField("stocksymbol", StringType, false) ::
+      StructField("clordid", StringType, false) ::
+      StructField("msgtype", StringType, false) ::
+      StructField("orderqty", IntegerType, true) ::
+      StructField("leavesqty", IntegerType, true) ::
+      StructField("cumqty", IntegerType, true) ::
+      StructField("avgpx", DoubleType, true) ::
+      StructField("lastupdated", LongType, false) :: Nil)
 
   def main(args: Array[String]): Unit = {
 
     if (args.length < 5) {
       System.err.println(
         """
-                            |Usage: StockStreamer <brokers> <topics> <kuduMaster> <tableName> <localFlag>
-                            |  <brokers> is a list of one or more Kafka brokers
-                            |  <topic> kafka topic to consume from
-                            |  <kuduMasters> is a list of one or more Kudu masters
-                            |  <tableName> is the name of the kudu table
-                            |  <localFlag> 'local' to run in local mode, else anything else for cluster
-                            |
+          |Usage: StockStreamer <brokers> <topics> <kuduMaster> <tableName> <localFlag>
+          |  <brokers> is a list of one or more Kafka brokers
+          |  <topic> kafka topic to consume from
+          |  <kuduMasters> is a list of one or more Kudu masters
+          |  <tableName> is the name of the kudu table
+          |  <localFlag> 'local' to run in local mode, else anything else for cluster
+          |
         """.stripMargin)
       System.exit(1)
     }
@@ -52,17 +52,17 @@ object KuduFixDataStreamer {
     val sqlContext = new SQLContext(sc)
     val ssc = new StreamingContext(sc, Seconds(5))
     var kuduContext: KuduContext = new KuduContext(kuduMaster)
-
     val broadcastSchema = sc.broadcast(schema)
-    val topicsSet = topics.split(",").toSet
-    val kafkaParams = Map[String, String]("metadata.broker.list" -> brokers)
-    val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topicsSet)
+
+    val topicSet = topics.split(",").toSet
+    val kafkaParams = Map[String,String]("metadata.broker.list"->brokers)
+    val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](ssc, kafkaParams, topicSet)
     val parsed = messages.map(line => {
       parseFixEvent(line._2)
     })
     parsed.foreachRDD(rdd => {
-      val df = sqlContext.createDataFrame(rdd, broadcastSchema.value)
-      kuduContext.upsertRows(df, tableName)
+      val df = sqlContext.createDataFrame(rdd,broadcastSchema.value)
+      kuduContext.upsertRows(df,tableName)
     })
 
     sys.ShutdownHookThread {
@@ -75,6 +75,7 @@ object KuduFixDataStreamer {
     ssc.checkpoint("./checkpoint")
     ssc.start()
     ssc.awaitTermination()
+
   }
 
   /**
@@ -86,7 +87,7 @@ object KuduFixDataStreamer {
   def parseFixEvent(eventString: String) : Row = {
     var fixElements = scala.collection.mutable.Map[String,String]()
     val pattern = """(\d*)=(.*?)(?:[\001])""".r
-    pattern.findAllIn(eventString).matchData foreach {
+    pattern.findAllIn(eventString).matchData.foreach {
       m => fixElements. += (m.group(1) -> m.group(2))
     }
     try {
@@ -102,9 +103,10 @@ object KuduFixDataStreamer {
         System.currentTimeMillis()
       )
     } catch {
-        case e:Exception => e.printStackTrace()
+      case e:Exception => e.printStackTrace()
         null
     }
 
   }
+
 }

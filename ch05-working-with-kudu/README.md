@@ -2,7 +2,7 @@
 
 This example shows how to build and run a project that demonstrates realtime data ingest, processing, and query using Apache Kudu. The project uses a [FIX message generator](https://github.com/cloudera-labs/envelope/tree/master/examples/fix) to simulate the continious creation of Fix financial messages which are published to Kafka and then persisted to Kudu using a Spark Streaming job. Once the FIX data is persisted into Kudu, a small web application uses Impala (via JDBC) to feed a realtime chart that analyzes peak order activity in near-realtime. 
 
-This example was testing using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
+This example was tested using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
 
 #### 1. Preparing the Kudu quickstart VM
 When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to install Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing this step and going straight to Step 2, you can easily use Cloudera Manager to accomplish the same thing. 
@@ -17,7 +17,7 @@ Run the 'quickstart_setup' to install the necessary software on the quickstart V
 
 #### 2. Install JDBC drivers and build the code. 
 
-Run the following on the host where you want to build the application. If running from the kudu quickstart you'll need to install maven. 
+Run the following on the host where you want to build your application.
 
 The webapp that feeds the FIX message visualization connects to Kudu through Impala, meaning you will need to download the Impala JDBC driver jars and make them available to maven as a dependency. For more information on how to build and run a Maven-based project to execute SQL queries on Impala using JDBC, see [here](https://github.com/onefoursix/Cloudera-Impala-JDBC-Example). 
  
@@ -107,4 +107,4 @@ Finally, run the web application using jetty:
     mvn jetty:run
     
 
-If you go to web-app-hostname:8080, you should see a visualization showing the largest order within that ten second window for each stock symbol. The chart should automatically refresh it's data every 10 seconds.  
+If you go to \<web-app-hostname\>:8080, you should see a visualization showing the largest order within that ten second window for each stock symbol. The chart should automatically refresh it's data every 10 seconds.  
