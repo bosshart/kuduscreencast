@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+set -x
+set -e
 #######
 # Depends on creating the tables in section 2
 #######
@@ -75,9 +76,9 @@ impala-shell -i localhost -d default -q "SELECT COUNT(*), AVG(rating) FROM user_
 impala-shell -i localhost -d default -q "SELECT COUNT(*), AVG(rating) FROM kudu_user_ratings WHERE movieid=470 AND userid=276"
 
 # Update and deletes in HDFS will fail
-impala-shell -i localhost -d default -q "SELECT AVG(rating) FROM user_item_ratings WHERE movietitle='Tombstone (1993)'"
-impala-shell -i localhost -d default -q "UPDATE user_item_ratings SET rating=5 WHERE movietitle='Tombstone (1993)'"
-impala-shell -i localhost -d default -q "DELETE FROM user_item_ratings WHERE movietitle='Tombstone (1993)'"
+impala-shell -i localhost -c -d default -q "SELECT AVG(rating) FROM user_item_ratings WHERE movietitle='Tombstone (1993)'"
+impala-shell -i localhost -c -d default -q "UPDATE user_item_ratings SET rating=5 WHERE movietitle='Tombstone (1993)'"
+impala-shell -i localhost -c -d default -q "DELETE FROM user_item_ratings WHERE movietitle='Tombstone (1993)'"
 
 # Update and delete in Kudu
 impala-shell -i localhost -d default -q "SELECT AVG(rating) FROM kudu_user_ratings WHERE movietitle='Tombstone (1993)'"

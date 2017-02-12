@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
-
+set -x
+set -e
 #######
 #
 # Before getting started, you'll need to download the dataset from https://github.com/bosshart/kuduscreencast/raw/master/api-sql-basics/user_ratings.txt
 # scp the zip file to /home/demo/ directory on kudu quickstart VM
-# Or download: wget https://github.com/bosshart/kuduscreencast/raw/master/api-sql-basics/user_ratings.txt
+# Or download: wget http://github.com/bosshart/kuduscreencast/blob/master/api-sql-basics/user_ratings.txt
 #######
 
 hadoop fs -ls /user/demo/
 hadoop fs -mkdir -p /user/demo/moviedata/
-hadoop fs -put user_ratings.txt /user/demo/moviedata/
+hadoop fs -put /tmp/user_ratings.txt /user/demo/moviedata/
 hadoop fs -ls /user/demo/moviedata/
 
 

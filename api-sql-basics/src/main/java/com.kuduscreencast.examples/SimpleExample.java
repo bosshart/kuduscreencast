@@ -23,6 +23,10 @@ public class SimpleExample {
     KuduClient client = new KuduClient.KuduClientBuilder(KUDU_MASTER).build();
 
     try {
+      // delete the table if it already exists
+      if(client.tableExists(tableName)) {
+        client.deleteTable(tableName);
+      }
       //Create our table
       List<ColumnSchema> columns = new ArrayList(3);
       columns.add(new ColumnSchema.ColumnSchemaBuilder("movieid", Type.INT32)
@@ -50,6 +54,7 @@ public class SimpleExample {
         row.addString(1, movies.get(i));
         row.addInt("rating", 5) ;
         session.apply(insert);
+        System.out.println("Inserted new row!");
       }
 
       // Read some data
