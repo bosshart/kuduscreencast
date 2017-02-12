@@ -1,6 +1,5 @@
 *.class
 *.log
-flume_ratings.tsv
 
 # sbt specific
 .cache

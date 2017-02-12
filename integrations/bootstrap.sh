@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# new
 sudo echo "[cloudera-cdh5]
 # Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
 name=Cloudera's Distribution for Hadoop, Version 5
