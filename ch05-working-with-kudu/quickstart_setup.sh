@@ -17,6 +17,7 @@ baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.8/
 gpgkey = http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
 gpgcheck = 1" > /etc/yum.repos.d/cloudera-cdh5.repo
 
+sudo yum -y install git
 sudo yum -y install zookeeper-server
 mkdir -p /var/lib/zookeeper
 sudo chown -R zookeeper /var/lib/zookeeper/
@@ -33,7 +34,7 @@ sudo service spark-master start
 sudo service spark-worker start
 
 wget -P /tmp/ http://apache.cs.utah.edu/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-sudo tar xzf apache-maven-3.3.9-bin.tar.gz -C /usr/local
+sudo tar xzf /tmp/apache-maven-3.3.9-bin.tar.gz -C /usr/local
 cat <<'EOF'>> maven.sh
 export M2_HOME=/usr/local/apache-maven-3.3.9
 export PATH=${M2_HOME}/bin:${PATH}

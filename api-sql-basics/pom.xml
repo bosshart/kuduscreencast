@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.kuduscreencast</groupId>
-    <artifactId>examples.api</artifactId>
+    <artifactId>sample.sql-api-basics</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
-        <kudu.version>1.1.0</kudu.version>
-        <spark.version>1.6.0-cdh5.8.3</spark.version>
+        <kudu.version>1.2.0</kudu.version>
+        <spark.version>1.6.0-cdh5.10.0</spark.version>
         <log4j.version>4.10</log4j.version>
     </properties>
     <build>
@@ -57,6 +57,7 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
     </dependencies>
 
     <repositories>

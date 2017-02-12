@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+mkdir -p /home/demo/ratings/
+
+###########
+# old C5.8 syntax
+#CREATE TABLE `streaming_user_ratings` (movieid INT,userid INT,rating INT,movietitle STRING)
+#DISTRIBUTE BY HASH (movieid) INTO 4 BUCKETS
+#TBLPROPERTIES(
+#  'storage_handler' = 'com.cloudera.kudu.hive.KuduStorageHandler',
+#  'kudu.table_name' = 'streaming_user_ratings',
+#  'kudu.master_addresses' = 'quickstart.cloudera:7051',
+#  'kudu.key_columns' = 'movieid, userid'
+#);
+#############
+
+
+#new syntax
+impala-shell -i localhost -d default -q "CREATE TABLE `streaming_user_ratings` (
+movieid INT,
+userid INT,
+rating INT,
+movietitle STRING,
+PRIMARY KEY(movieid, userid)
+)
+PARTITION BY HASH(movieid)
+PARTITIONS 4 STORED AS KUDU;"
+
+
+sudo yum install autoconf automake cyrus-sasl-devel cyrus-sasl-gssapi \
+  cyrus-sasl-plain gcc gcc-c++ gdb git krb5-server krb5-workstation libtool \
+  make openssl-devel patch pkgconfig redhat-lsb-core rsync unzip vim-common which
+If building on RHEL or CentOS older than 7.0, install the Red Hat Developer Toolset.
+
+DTLS_RPM=rhscl-devtoolset-3-epel-6-x86_64-1-2.noarch.rpm
+DTLS_RPM_URL=https://www.softwarecollections.org/repos/rhscl/devtoolset-3/epel-6-x86_64/noarch/${DTLS_RPM}
+wget ${DTLS_RPM_URL} -O ${DTLS_RPM}
+sudo yum install -y scl-utils ${DTLS_RPM}
+sudo yum install -y devtoolset-3-toolchain
+
+
+build-support/enable_devtoolset.sh thirdparty/build-thirdparty.sh protobuf
+
+# old
+sudo echo "[cloudera-cdh5]
+# Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
+name=Cloudera's Distribution for Hadoop, Version 5
+baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.8/
+gpgkey = http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
+gpgcheck = 1" > /etc/yum.repos.d/cloudera-cdh5.repo
+
+# new
+sudo echo "[cloudera-cdh5]
+# Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
+name=Cloudera's Distribution for Hadoop, Version 5
+baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.10/
+gpgkey = http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
+gpgcheck = 1" > /etc/yum.repos.d/cloudera-cdh5.repo
+
+sudo yum -y install git flume-ng flume-ng-agent
+sudo service flume-ng-agent start
+sudo service flume-ng-agent status
+wget -P /tmp/ http://apache.cs.utah.edu/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
+sudo tar xzf /tmp/apache-maven-3.3.9-bin.tar.gz -C /usr/local
+cat <<'EOF'>> maven.sh
+export M2_HOME=/usr/local/apache-maven-3.3.9
+export PATH=${M2_HOME}/bin:${PATH}
+EOF
+sudo mv maven.sh /etc/profile.d/maven.sh
+source /etc/profile
+
+
+mkdir kuduclient
+cd kuduclient/
+
+#old
+git clone -b branch-1.1.x https://github.com/apache/kudu.git
+
+#old
+git clone -b branch-1.2.x https://github.com/apache/kudu.git
+
