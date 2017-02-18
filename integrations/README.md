@@ -6,8 +6,9 @@ Before running these examples, you'll need flume, git, and maven installed. You'
     ./bootstrap.sh
  
 About these examples: 
-1. Segment 1 demonstrates integrating Kudu with Apache Flume. The steps to get flume running are in `flume_example.sh`. 
-2. Segment 2 is the first of two segments looking at the integration of Kudu with Apache Spark. See code in `CreateTable.scala` and `SparkExample.scala`. 
-3. Segment 3 is the second Kudu-Spark segment, create a new Kudu table using Spark and then some fun with Spark MLLib. See `SparkExample.scala`. 
+
+* Segment 1 demonstrates integrating Kudu with Apache Flume. The steps to get flume running are in `flume_example.sh`. 
+* Segment 2 is the first of two segments looking at the integration of Kudu with Apache Spark. See code in `CreateTable.scala` and `SparkExample.scala`. 
+* Segment 3 is the second Kudu-Spark segment, create a new Kudu table using Spark and then some fun with Spark MLLib. See `SparkExample.scala`. 
 
     
