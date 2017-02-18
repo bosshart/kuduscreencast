@@ -13,7 +13,7 @@ gpgcheck = 1" > /etc/yum.repos.d/cloudera-kafka.repo
 sudo echo "[cloudera-cdh5]
 # Packages for Cloudera's Distribution for Hadoop, Version 5, on RedHat	or CentOS 6 x86_64
 name=Cloudera's Distribution for Hadoop, Version 5
-baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.8/
+baseurl=http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.10/
 gpgkey = http://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera
 gpgcheck = 1" > /etc/yum.repos.d/cloudera-cdh5.repo
 
@@ -30,6 +30,7 @@ sudo yum -y install spark-core spark-master spark-worker
 #Replace the relevant portion of /etc/spark/conf/spark-env.sh to point to the host where the spark-master runs
 sed -i "s/export STANDALONE_SPARK_MASTER_HOST=\`hostname\`/export STANDALONE_SPARK_MASTER_HOST=quickstart.cloudera/" /etc/spark/conf/spark-env.sh
 
+sudo service kafka-server start
 sudo service spark-master start
 sudo service spark-worker start
 

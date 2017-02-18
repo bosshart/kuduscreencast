@@ -1,6 +1,6 @@
 ### Kudu Basics: Basic Kudu Installation, API Usage, and SQL Integration
 
-Before running these examples, I recommend installing git and maven. For example: 
+Before running these examples, I recommend installing git and maven. See the `boostrap.sh` script or run the following: 
 
     sudo yum -y install git
     wget -P /tmp/ http://apache.cs.utah.edu/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
@@ -14,7 +14,7 @@ Before running these examples, I recommend installing git and maven. For example
 
 You'll also want to download some sample data: 
 
-    wget -P /tmp http://github.com/bosshart/kuduscreencast/blob/master/api-sql-basics/user_ratings.txt
+    wget -P /tmp https://raw.githubusercontent.com/bosshart/kuduscreencast/master/api-sql-basics/user_ratings.txt
 
 About these examples: 
 

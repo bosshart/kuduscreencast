@@ -1,16 +1,11 @@
 package com.kuduscreencast.example
 
-import java.util
-
-import org.apache.kudu.ColumnSchema.ColumnSchemaBuilder
-import org.apache.kudu.client.KuduClient.KuduClientBuilder
+import org.apache.kudu.client.CreateTableOptions
 import org.apache.kudu.client.shaded.com.google.common.collect.ImmutableList
 import org.apache.kudu.spark.kudu.KuduContext
-import org.apache.kudu.{Type, Schema, ColumnSchema}
-import org.apache.kudu.client.{CreateTableOptions, KuduClient}
-import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.sql.SQLContext
-import org.apache.spark.sql.types.{StringType, IntegerType, StructField, StructType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * Created by bosshart on 12/4/16.

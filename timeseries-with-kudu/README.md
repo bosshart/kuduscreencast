@@ -10,7 +10,7 @@ When running this project, you'll need an environment running Kafka, Kudu, Impal
 Run the 'quickstart_setup' to install the necessary software on the quickstart VM: 
     
     git clone https://github.com/bosshart/kuduscreencast.git
-    cd kuduscreencast/ch05-working-with-kudu/
+    cd kuduscreencast/timeseries-with-kudu/
     chmod u+x quickstart_setup.sh
     sudo ./quickstart_setup.sh
     
@@ -47,7 +47,7 @@ Install the JDBC drivers in your local maven repo:
 Clone the repo (if you haven't already) and build the project. 
 
     git clone https://github.com/bosshart/kuduscreencast.git
-    cd kuduscreencast/ch05-working-with-kudu/
+    cd kuduscreencast/timeseries-with-kudu/
     mvn clean
     mvn package
 
@@ -59,7 +59,7 @@ Move the "sample app" to the quickstart VM or edge node as needed.
 
 The FIX message generator will publish order and execution messages to a Kafka topic. I named my kafka topic "fixdata" and configured it with one partition and no replicas so it could run on the quickstart VM.
 
-    kafka-topics --zookeeper quickstart:2181 --create --topic fixdata --partitions 1 --replication-factor 1
+    kafka-topics --zookeeper quickstart.cloudera:2181 --create --topic fixdata --partitions 1 --replication-factor 1
     
 If you want, you can test Kafka. In separate ssh sessions, run both: 
 
@@ -70,7 +70,7 @@ You should be able input test in the "producer" side and see it emitted in the c
 
 Next, create the corresponding Kudu and Impala tables. Specify the kudu master (quickstart), name of table ("fixdata"), number of hash partitions for the stocksymbol (3), and number of range partitions on transaction time (also 3). Also, optionally, specify "quickstart" in order to only create a single replica. If you skip this argument, you'll end up with the default 3 tablet replicas. 
     
-    java -cp com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3 3 quickstart
+    java -cp sample.app-1.0-SNAPSHOT.jar com.kuduscreencast.timeseries.CreateFixTable quickstart fixdata 3 3 quickstart
     impala-shell
     [quickstart.cloudera:21000] > CREATE EXTERNAL TABLE `fixdata` (
                                   `transacttime` BIGINT,
@@ -107,7 +107,7 @@ Run the Fix message generator
 
 Run the Spark Streaming application to populate Kudu: 
     
-    spark-submit --master spark://quickstart:7077  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata
+    spark-submit --master spark://quickstart:7077  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata quickstart
 
 Finally, run the web application using jetty: 
 

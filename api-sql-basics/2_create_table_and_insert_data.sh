@@ -5,7 +5,7 @@ set -e
 #
 # Before getting started, you'll need to download the dataset from https://github.com/bosshart/kuduscreencast/raw/master/api-sql-basics/user_ratings.txt
 # scp the zip file to /home/demo/ directory on kudu quickstart VM
-# Or download: wget http://github.com/bosshart/kuduscreencast/blob/master/api-sql-basics/user_ratings.txt
+# Or download: wget https://raw.githubusercontent.com/bosshart/kuduscreencast/master/api-sql-basics/user_ratings.txt
 #######
 
 hadoop fs -ls /user/demo/

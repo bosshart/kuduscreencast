@@ -5,13 +5,9 @@ import org.apache.kudu.client.shaded.com.google.common.collect.ImmutableList
 import org.apache.kudu.spark.kudu.KuduContext
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.ml.recommendation.ALS
-import org.apache.spark.ml.recommendation.ALS.Rating
-import org.apache.spark.mllib.clustering.KMeans
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.functions._
+import org.apache.spark.{SparkConf, SparkContext}
 
 
 
@@ -43,8 +39,6 @@ object SparkExample {
     val sc = new SparkContext(sparkConf)
     val sqlContext = new SQLContext(sc)
 
-
-
     var kuduOptions = Map(
       "kudu.table" -> args(1),
       "kudu.master" -> args(0))
@@ -67,8 +61,8 @@ object SparkExample {
     kuduContext.updateRows(fixedRatings,tableName)
 
     // try this first, oh it fails, deletes should only specify the key columns
-    val topGunDf = sqlContext.sql(s"""SELECT movieid, userid, rating FROM movies WHERE movietitle="Dirty Dancing (1987)" and rating < 3 """)
-    kuduContext.deleteRows(topGunDf,tableName)
+    //val topGunDf = sqlContext.sql(s"""SELECT movieid, userid, rating FROM movies WHERE movietitle="Dirty Dancing (1987)" and rating < 3 """)
+    //kuduContext.deleteRows(topGunDf,tableName)
 
     // do this instead
     val topGunDf2 = sqlContext.sql(s"""SELECT movieid, userid FROM movies WHERE movietitle="Dirty Dancing (1987)" and rating < 3 """)

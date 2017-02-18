@@ -1,13 +1,13 @@
 ### Integrating Kudu with Flume and Spark
 
-Before running these examples, I recommend installing git and maven. For example: 
+Before running these examples, you'll need flume, git, and maven installed. You'll also need some sample data downloaded and staged in Kudu. There's a script in the project to automate this:  
 
-    sudo yum -y install git
-    wget -P /tmp/ http://apache.cs.utah.edu/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
-    sudo tar xzf /tmp/apache-maven-3.3.9-bin.tar.gz -C /usr/local
-    cat <<'EOF'>> maven.sh
-    export M2_HOME=/usr/local/apache-maven-3.3.9
-    export PATH=${M2_HOME}/bin:${PATH}
-    EOF
-    sudo mv maven.sh /etc/profile.d/maven.sh
-    source /etc/profile
+    cd integrations/
+    ./bootstrap.sh
+ 
+About these examples: 
+1. Segment 1 demonstrates integrating Kudu with Apache Flume. The steps to get flume running are in `flume_example.sh`. 
+2. Segment 2 is the first of two segments looking at the integration of Kudu with Apache Spark. See code in `CreateTable.scala` and `SparkExample.scala`. 
+3. Segment 3 is the second Kudu-Spark segment, create a new Kudu table using Spark and then some fun with Spark MLLib. See `SparkExample.scala`. 
+
+    

@@ -1,4 +1,4 @@
-package com.kuduscreencast.examples;
+package com.kuduscreencast.sample;
 
 import org.apache.kudu.ColumnSchema;
 import org.apache.kudu.Schema;
