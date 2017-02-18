@@ -18,19 +18,19 @@ You'll also want to download some sample data:
 
 About these examples: 
 
-1. Segment 1 demonstrates basic CRUD operations using Apache Impala and Kudu. You can run it as a script via: 
+*Segment 1 demonstrates basic CRUD operations using Apache Impala and Kudu. You can run it as a script via: 
 ```
     git clone https://github.com/bosshart/kuduscreencast.git
     cd kuduscreencast/api-sql-basics/
     chmod u+x 2_create_table_and_insert_data.sh 
     ./2_create_table_and_insert_data.sh 
 ```
-2. Segment 2 demonstrates querying Kudu data via Impala and depends on the steps in segment 1. You can run it as a script via: 
+*Segment 2 demonstrates querying Kudu data via Impala and depends on the steps in segment 1. You can run it as a script via: 
 ```    
     chmod u+x 2_create_table_and_insert_data.sh 
     ./3_query_data.sh
 ```
-3. Run the simple API example via the following. Note that the example has the kudu master host hard-coded to be the quickstart. 
+*Run the simple API example via the following. Note that the example has the kudu master host hard-coded to be the quickstart. 
 ```
     mvn clean
     mvn package
