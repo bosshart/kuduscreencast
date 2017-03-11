@@ -18,7 +18,6 @@ import java.sql.Statement;
 public class FIXDataServlet extends HttpServlet {
   private Connection connection;
 
-  private static String connectionUrl = "jdbc:impala://quickstart.cloudera:21050";
   private static final String jdbcDriverName = "com.cloudera.impala.jdbc41.DataSource";
 
   public void init(ServletConfig config) throws ServletException {
@@ -26,10 +25,14 @@ public class FIXDataServlet extends HttpServlet {
 
     try {
       // Load the driver
+      String impalaHostname = System.getProperty("impalaHost");
+      String connectionUrl = "jdbc:impala://" + impalaHostname + ":21050";
       Class.forName(jdbcDriverName);
       DataSource ds = new DataSource();
       ds.setURL(connectionUrl);
       connection = ds.getConnection();
+      Statement stmt = connection.createStatement();
+      stmt.execute("SET DISABLE_CODEGEN=true;");
     }
     catch (Exception e) {
       e.printStackTrace();

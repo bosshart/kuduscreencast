@@ -18,8 +18,6 @@ import org.apache.spark.{SparkConf, SparkContext}
   * Usage: SparkExample <kudumaster> <kudutablename>
   *   <kudumaster> is/are the kudu master hosts
   *   <kudutablename> is the name of the "movie table" created separately
-  *
-  *
   */
 object SparkExample {
 

@@ -2,7 +2,7 @@
 
 This example shows how to build and run a project that demonstrates realtime data ingest, processing, and query using Apache Kudu. The project uses a [FIX message generator](https://github.com/cloudera-labs/envelope/tree/master/examples/fix) to simulate the continious creation of Fix financial messages which are published to Kafka and then persisted to Kudu using a Spark Streaming job. Once the FIX data is persisted into Kudu, a small web application uses Impala (via JDBC) to feed a realtime chart that analyzes peak order activity in near-realtime. 
 
-This example was tested using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
+This example assumed you're using the Kudu quickstart VM and was tested using Kudu version 1.1, Kafka version 0.9.0 (included with Cloudera Distribution of Kafka version 2.0), Spark 1.6 and Impala 2.5 (included with CDH 5.8), and the [Impala JDBC Driver v2.5.36](http://www.cloudera.com/downloads/connectors/impala/jdbc/2-5-36.html). 
 
 #### 1. Preparing the Kudu quickstart VM
 When running this project, you'll need an environment running Kafka, Kudu, Impala, and Spark. These instructions assume you're using the [Kudu Quickstart VM](https://kudu.apache.org/docs/quickstart.html), but can easily be adapted to run on a "real", fully-distributed cluster. Since the Kudu quickstart doesn't come with Kafka, we'll need to install Spark, Kafka, and Zookeeper. If you're running on a fully distributed Cloudera cluster, I'd recommend bypassing this step and going straight to Step 2, you can easily use Cloudera Manager to accomplish the same thing. 
@@ -103,15 +103,15 @@ If you're using CDH 5.10 or later, you'll need different syntax when creating th
     
 Run the Fix message generator
 
-    spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.FIXGenerator sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata
+    spark-submit --master spark://:quickstart.cloudera  --class com.kuduscreencast.timeseries.FIXGenerator timeseries-with-kudu-1.0-SNAPSHOT.jar quickstart:9092 fixdata
 
 Run the Spark Streaming application to populate Kudu: 
     
-    spark-submit --master spark://quickstart:7077  --class com.kuduscreencast.timeseries.KuduFixDataStreamer sample.app-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata quickstart
+    spark-submit --master spark://quickstart:7077  --class com.kuduscreencast.timeseries.KuduFixDataStreamer timeseries-with-kudu-1.0-SNAPSHOT.jar quickstart:9092 fixdata quickstart fixdata quickstart
 
-Finally, run the web application using jetty: 
+Finally, run the web application using jetty and pass the hostname for the impala daemon to connect to: 
 
-    mvn jetty:run
+    mvn jetty:run -DimpalaHost=quickstart
     
 
 If you go to \<web-app-hostname\>:8080, you should see a visualization showing the largest order within that ten second window for each stock symbol. The chart should automatically refresh it's data every 10 seconds.  

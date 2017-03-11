@@ -7,9 +7,7 @@ import org.apache.spark.sql.SQLContext
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.apache.spark.{SparkConf, SparkContext}
 
-/**
-  * Created by bosshart on 12/4/16.
-  */
+
 object CreateTable {
 
   val newSchema =
@@ -49,16 +47,6 @@ object CreateTable {
       new CreateTableOptions().addHashPartitions(ImmutableList.of("movieid"), 3)
         .setNumReplicas(1))
 
-  }
-
-  private def getSqlContext(appName: String, isLocal: Boolean): SQLContext = {
-    val sparkConf = new SparkConf().setAppName(appName)
-    if (isLocal) {
-      sparkConf.setMaster("local").
-        set("spark.ui.enabled", "false")
-    }
-    val sc = new SparkContext(sparkConf)
-    new SQLContext(sc)
   }
 }
 

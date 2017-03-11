@@ -55,7 +55,7 @@ pageEncoding="US-ASCII"%>
 
     window.setInterval(function(){
         makeplot();
-    }, 5000);
+    }, 4000);
 
   </script>
 </body>
